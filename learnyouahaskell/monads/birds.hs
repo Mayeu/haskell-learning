@@ -18,3 +18,10 @@ landRight n (left, right)
 -- banana make Paul to always fall
 banana :: Pole -> Maybe Pole
 banana _ = Nothing
+
+-- caling a routine using the do notation for monad
+routine :: Maybe Pole
+routine = do let start = (0,0)
+             first <- landLeft 2 start
+             second <- landRight 2 first
+             landLeft 1 second
