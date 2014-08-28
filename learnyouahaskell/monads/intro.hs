@@ -26,3 +26,8 @@ applyMaybe (Just x) f = f x
 --     Nothing >>= f = Nothing
 --     Just x >>= f  = f x
 --     fail _        = Nothing
+--
+-- As functor and Applicative, Monads follow some law
+--   * left identity: return x >>= f <=> f x
+--   * right identity: m >>= return <=> m
+--   * associativity: (m >>= f) >>= g <=> m >>= (\x -> f x >>= g)
