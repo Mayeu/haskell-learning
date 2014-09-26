@@ -6,6 +6,7 @@
 module Main where
 
 import Control.Concurrent.STM
+import Data.IntMap
 
 import Yesod
 
@@ -14,5 +15,6 @@ import Dispatch ()
 
 main :: IO ()
 main = do
-    tfilenames <- atomically $ newTVar []
-    warp 3000 $ App tfilenames
+    tstore <- atomically $ newTVar empty
+    tident <- atomically $ newTVar 0
+    warp 3000 $ App tident tstore

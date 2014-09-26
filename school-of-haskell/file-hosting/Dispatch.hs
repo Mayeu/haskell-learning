@@ -12,5 +12,6 @@ import Yesod.Default.Util
 import Foundation
 import Handler.Home
 import Handler.Preview
+import Handler.Download
 
 mkYesodDispatch "App" resourcesApp
