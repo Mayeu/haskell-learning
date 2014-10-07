@@ -4,15 +4,18 @@ import Data.Maybe
 import Data.List
 
 import Text.Feed.Import
+import Text.Feed.Export
 import Text.Feed.Query
 import Text.Feed.Types
 import Text.Feed.Constructor
 
+import Text.XML.Light
 import Text.XML.HXT.Core
 
 import Text.HandsomeSoup
 
 import System.Environment
+import System.IO.Unsafe
 
 main :: IO ()
 main = do
@@ -21,29 +24,29 @@ main = do
   let items = getFeedItems feed
   let urls = map getUrl items
   imgs <- mapM getComic urls
-  mapM_ putStrLn imgs
---
-expandFeed :: Feed -> Feed
-expandFeed feed = withFeedItems (insertComics items) feed
-  where items = getFeedItems feed
+  let newFeed = withFeedItems (insertComics imgs items) feed
+  --mapM_ putStrLn imgs
+  writeFile "newFeed.xml" (ppTopElement $ xmlFeed newFeed)
 
-insertComics :: [Item] -> [Item]
-insertComics = map expandItem
+--expandFeed :: Feed -> Feed
+--expandFeed feed = withFeedItems (insertComics items) feed
+--  where items = getFeedItems feed
 
-expandItem :: Item -> Item
-expandItem it = withItemDescription newDesc it
+insertComics :: [String] -> [Item] -> [Item]
+insertComics urls its = map expandItem $ zip urls its
+
+expandItem :: (String, Item) -> Item
+expandItem (url, it) = withItemDescription newDesc it
   where
-      oldDesc = fromJust $ getItemDescription it
-      imgUrl  = getComic $ getUrl it
-      newDesc = updateDescription imgUrl it
+      --oldDesc = fromJust $ getItemDescription it
+      newDesc = updateDescription url it
 
-updateDescription :: IO String -> Item -> String
+updateDescription :: String -> Item -> String
 updateDescription url it =
     let desc = fromJust $ getItemDescription it
         doc = readString [] desc
-    in runX . xshow $
-         doc >>> processTopDown (ifA (hasName "a")
-                   (injectImage url) this)
+    in head $ unsafePerformIO $ runX . xshow $
+         doc >>> processTopDown (ifA (hasName "a") (injectImage url) this)
 
 --injectImage :: String -> String
 injectImage url = replaceChildren ( imgElement <+> getChildren )
